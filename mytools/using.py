@@ -7,13 +7,16 @@ import sys
 sys.path.append("..")
 from segment_anything import sam_model_registry, SamPredictor
 
-# sam_checkpoint = "sam_vit_h_4b8939.pth"
+sam_checkpoint = "sam_vit_h_4b8939.pth"
+model_type = "default" #"vit_h"
+
 # sam_checkpoint = "sam_vit_l_0b3195.pth"
-sam_checkpoint = "sam_vit_b_01ec64.pth"
-device = "cuda"
-# model_type = "default" #"vit_h"
 # model_type = "vit_l"
-model_type = "vit_b"
+
+# sam_checkpoint = "sam_vit_b_01ec64.pth"
+# model_type = "vit_b"
+
+device = "cuda"
 
 
 def show_mask(mask, ax, random_color=False):
@@ -41,9 +44,9 @@ def on_EVENT_BUTTONDOWN(event, x, y, flags, param):
     # print(param)
     if event == cv2.EVENT_LBUTTONDOWN:
         xy = "%d,%d" % (x, y)
-        cv2.circle(param["image_show"], (x, y), 10, (255, 0, 0), thickness=-1)
-        cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
-                    1.0, (255, 255, 255), thickness=2)
+        cv2.circle(param["image_show"], (x, y), 5, (255, 0, 0), thickness=-1)
+        # cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
+        #             1.0, (255, 255, 255), thickness=2)
         cv2.imshow("image", param["image_show"])
 
         if (param['input_point'].shape[0]==0):
@@ -56,16 +59,21 @@ def on_EVENT_BUTTONDOWN(event, x, y, flags, param):
         print(param['input_label'])
         interface(param["predictor"], param['input_point'], param['input_label'], param['image'], param['image_show'])
         #需要重新绘制每一个点，换成点掩码图叠加
-        cv2.circle(param["image_show"], (x, y), 10, (255, 0, 0), thickness=-1)
-        cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
-                    1.0, (255, 255, 255), thickness=2)
+        for i in range(len(param['input_point'])):
+            if param['input_label'][i] == 1:
+                cv2.circle(param["image_show"], param['input_point'][i], 5, (255, 0, 0), thickness=-1)
+            else:
+                cv2.circle(param["image_show"], param['input_point'][i], 5, (0, 0, 255), thickness=-1)
+        # cv2.circle(param["image_show"], (x, y), 10, (255, 0, 0), thickness=-1)
+        # cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
+        #             1.0, (255, 255, 255), thickness=2)
         cv2.imshow("image", param["image_show"])
 
     if event == cv2.EVENT_RBUTTONDOWN:
         xy = "%d,%d" % (x, y)
-        cv2.circle(param["image_show"], (x, y), 10, (0, 0, 255), thickness=-1)
-        cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
-                    1.0, (255, 255, 255), thickness=2)
+        cv2.circle(param["image_show"], (x, y), 5, (0, 0, 255), thickness=-1)
+        # cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
+        #             1.0, (255, 255, 255), thickness=2)
         cv2.imshow("image", param["image_show"])
         if (param['input_point'].shape[0]==0):
             param['input_point']=np.array([[int(x), int(y)]])
@@ -77,9 +85,14 @@ def on_EVENT_BUTTONDOWN(event, x, y, flags, param):
         print(param['input_label'])
         interface(param["predictor"], param['input_point'], param['input_label'], param['image'], param['image_show'])
         #需要重新绘制每一个点，换成点掩码图叠加
-        cv2.circle(param["image_show"], (x, y), 10, (0, 0, 255), thickness=-1)
-        cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
-                    1.0, (255, 255, 255), thickness=2)
+        for i in range(len(param['input_point'])):
+            if param['input_label'][i] == 1:
+                cv2.circle(param["image_show"], param['input_point'][i], 5, (255, 0, 0), thickness=-1)
+            else:
+                cv2.circle(param["image_show"], param['input_point'][i], 5, (0, 0, 255), thickness=-1)
+
+        # cv2.putText(param["image_show"], xy, (x, y), cv2.FONT_HERSHEY_PLAIN,
+        #             1.0, (255, 255, 255), thickness=2)
         cv2.imshow("image", param["image_show"])
 
 def interface(predictor, input_point, input_label, image, image_show):
